@@ -73,6 +73,10 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
+      - name: Unit Testing in Docker
+        run: |
+          docker run --rm ${{ github.run_id }} echo "composer -v"
+
       - name: Docker meta
         id: docker_meta
         uses: docker/metadata-action@v4
