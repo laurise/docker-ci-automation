@@ -28,4 +28,4 @@ RUN apt-get update && apt-get install -y \
         
 # Install Composer
 RUN curl https://getcomposer.org/installer | \
-        php -- --install-dir=/usr/local/bin --filename=composer
+    php -- --install-dir=/usr/local/bin --filename=composer
