@@ -7,9 +7,6 @@ on:
       - main
   pull_request:
 
-env:
-  REGISTRY_IMAGE: laurise/docker-ci-automation
-
 jobs:
   build-image:
     name: Build Image
@@ -41,7 +38,15 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: laurise/docker-ci-automation
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=1.0.0
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=pr
+            type=ref,event=branch
+            type=semver,pattern={{version}}
 
       - name: Docker build
         uses: docker/build-push-action@v4
