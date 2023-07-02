@@ -31,9 +31,11 @@ jobs:
       - name: Checkout Git repository
         uses: actions/checkout@v3
 
+      # Add support for multi-platform builds
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
+      # Add support for caching
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -53,14 +55,15 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
-      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
+      # Scan for CVEs (Common Vulnerabilities and Exposures)
+      - name: Run Trivy for CVEs and report
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ github.run_id }}
           exit-code: 1
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+          severity: 'HIGH,CRITICAL'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
