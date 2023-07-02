@@ -1,5 +1,5 @@
 ---
-name: 01 Basic Docker Build
+name: ci
 
 on:
   push:
@@ -7,10 +7,19 @@ on:
       - main
   pull_request:
 
+env:
+  REGISTRY_IMAGE: laurise/docker-ci-automation
+
 jobs:
   build-image:
     name: Build Image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          # - linux/arm64
+          # - linux/arm/v7
     steps:
 
       # Add multi-platform builds
@@ -27,11 +36,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Add metadata and dynamic tags
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=1.0.0,enable={{is_default_branch}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Docker build
         uses: docker/build-push-action@v4
         with:
-          push: ${{ github.event_name == 'push' }}
-          tags: laurise/docker-ci-automation:latest,laurise/docker-ci-automation:1.0.0
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: ${{ matrix.platform }}
